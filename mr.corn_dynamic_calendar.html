@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>玉米的動態萬年曆</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            text-align: center;
+            margin: 0;
+        }
+        header {
+            background-color: #f4f4f4;
+            padding: 1.2vw;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 95vw;
+            margin: 0 auto;
+        }
+        .header-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .calendar-container {
+            width: 95vw;
+            margin: 1.2vw auto;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 0.9vw;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 0.3vw;
+            text-align: center;
+        }
+        th {
+            background-color: #555;
+            color: #666666;
+            font-weight: bold;
+        }
+        td {
+            background-color: white;
+            color: #333;
+        }
+        .month-title {
+            background-color: #f4f4f4;
+            font-weight: bold;
+        }
+        .holiday {
+            color: red;
+            background-color: #ffecec;
+        }
+        .today {
+            background-color: #003366;
+            color: #ffcc00;
+            font-size: 1.1vw;
+            font-weight: bold;
+            border: 2px solid #ffcc00;
+        }
+        .year-title {
+            background-color: #f4f4f4;
+            color: #666666;
+            font-weight: bold;
+            font-size: 1vw;
+        }
+        .weekday {
+            background-color: #fafafa;
+            color: #666666;
+        }
+        h1 {
+            font-family: sans-serif;
+            font-size: 1.8vw;
+            margin: 0.6vw 0;
+        }
+        label, input {
+            font-family: sans-serif;
+            font-size: 1vw;
+        }
+        .input-container {
+            margin-bottom: 0.8vw;
+        }
+        .button-container {
+            margin-top: 0.5vw;
+        }
+        button {
+            background-color: #003366;
+            color: #ffcc00;
+            border: none;
+            padding: 0.5vw 1vw;
+            font-size: 0.8vw;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #ffcc00;
+            color: #003366;
+        }
+        footer {
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 0.8vw;
+            margin-top: 0.8vw;
+            box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+            width: 95vw;
+            margin: 0 auto;
+        }
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        footer a {
+            color: #007BFF;
+            text-decoration: none;
+            font-size: 0.9vw;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+        footer p {
+            font-size: 0.8vw;
+            line-height: 1.5;
+        }
+        @media screen and (max-width: 768px) {
+            table {
+                font-size: 0.7vw;
+            }
+            th, td {
+                padding: 0.2vw;
+            }
+            h1 {
+                font-size: 1.4vw;
+            }
+            .year-title {
+                font-size: 0.9vw;
+            }
+            .input-container label, .input-container input {
+                font-size: 0.9vw;
+            }
+            footer {
+                padding: 0.6vw;
+            }
+            footer a {
+                font-size: 0.8vw;
+            }
+            footer p {
+                font-size: 0.7vw;
+            }
+        }
+        @media screen and (max-width: 480px) {
+            table {
+                font-size: 0.6vw;
+            }
+            th, td {
+                padding: 0.2vw;
+            }
+            h1 {
+                font-size: 1.2vw;
+            }
+            .year-title {
+                font-size: 0.7vw;
+            }
+            .input-container label, .input-container input {
+                font-size: 0.7vw;
+            }
+            footer {
+                padding: 0.5vw;
+            }
+            footer a {
+                font-size: 0.7vw;
+            }
+            footer p {
+                font-size: 0.6vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>Mr. Corn 口袋萬年曆</h1>
+            <div class="input-container">
+                <label for="yearInput">輸入年份：</label>
+                <input type="number" id="yearInput" placeholder="例如：2024" oninput="generateCalendar()" />
+            </div>
+            <div class="button-container">
+                <button id="resetToToday">回到今日</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="calendar-container">
+        <div id="calendar">
+            <!-- 動態生成日曆表格 -->
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <p>Since 2024 © <a href="https://corn.is/fb" target="_blank">Mr. Corn｜玉米｜黃昱銘</a> 製作</p>
+        </div>
+    </footer>
+
+    <script>
+        function generateCalendar() {
+            const yearInput = document.getElementById('yearInput');
+            const year = parseInt(yearInput.value);
+            const calendarDiv = document.getElementById('calendar');
+            calendarDiv.innerHTML = '';
+
+            if (isNaN(year) || year < 1) {
+                calendarDiv.textContent = '請輸入有效的年份。';
+                return;
+            }
+
+            const months = [
+                '一月', '二月', '三月', '四月', '五月', '六月',
+                '七月', '八月', '九月', '十月', '十一月', '十二月'
+            ];
+
+            const days = ['一', '二', '三', '四', '五', '六', '日'];
+
+            const table = document.createElement('table');
+
+            // 星期標題列 (上方)
+            const dayHeader = document.createElement('tr');
+            const topLeftCorner = document.createElement('td');
+            topLeftCorner.textContent = year; // 左上角年份
+            topLeftCorner.className = 'year-title';
+            dayHeader.appendChild(topLeftCorner);
+
+            for (let i = 0; i < 5; i++) { // 最多重複 5 次完整週數
+                days.forEach(day => {
+                    const th = document.createElement('th');
+                    th.textContent = day;
+                    th.className = 'weekday';
+                    if (day === '六' || day === '日') {
+                        th.className = 'holiday';
+                    }
+                    dayHeader.appendChild(th);
+                });
+            }
+
+            // 最後一週僅顯示到週二
+            ['一', '二'].forEach(day => {
+                const th = document.createElement('th');
+                th.textContent = day;
+                th.className = 'weekday';
+                dayHeader.appendChild(th);
+            });
+
+            const topRightCorner = document.createElement('td');
+            topRightCorner.textContent = year; // 右上角年份
+            topRightCorner.className = 'year-title';
+            dayHeader.appendChild(topRightCorner);
+
+            table.appendChild(dayHeader);
+
+            months.forEach((month, index) => {
+                const monthRow = document.createElement('tr');
+                const monthCell = document.createElement('td');
+                monthCell.textContent = month;
+                monthCell.className = 'month-title';
+                monthRow.appendChild(monthCell);
+
+                const firstDay = new Date(year, index, 1).getDay();
+                const daysInMonth = new Date(year, index + 1, 0).getDate();
+
+                let date = 1;
+                const today = new Date();
+                for (let i = 0; i < 6; i++) { // 每個月最多6週
+                    for (let j = 0; j < 7; j++) { // 一週7天
+                        const cell = document.createElement('td');
+                        if (i === 0 && j < (firstDay || 7) - 1) {
+                            cell.textContent = '';
+                        } else if (date > daysInMonth) {
+                            cell.textContent = '';
+                        } else {
+                            cell.textContent = date;
+                            if (year === today.getFullYear() && index === today.getMonth() && date === today.getDate()) {
+                                cell.className = 'today';
+                            } else if (j === 5 || j === 6) { // 假日標紅
+                                cell.className = 'holiday';
+                            }
+                            date++;
+                        }
+                        monthRow.appendChild(cell);
+                        if (monthRow.children.length === 38) break; // 限制橫向日期格數到 38
+                    }
+                    if (monthRow.children.length === 38) break;
+                }
+
+                // 在最右側添加月份名稱
+                const monthEndCell = document.createElement('td');
+                monthEndCell.textContent = month;
+                monthEndCell.className = 'month-title';
+                monthRow.appendChild(monthEndCell);
+
+                table.appendChild(monthRow);
+            });
+
+            // 星期標題列 (下方)
+            const dayFooter = document.createElement('tr');
+            const bottomLeftCorner = document.createElement('td');
+            bottomLeftCorner.textContent = year; // 左下角年份
+            bottomLeftCorner.className = 'year-title';
+            dayFooter.appendChild(bottomLeftCorner);
+
+            for (let i = 0; i < 5; i++) { // 最多重複 5 次完整週數
+                days.forEach(day => {
+                    const th = document.createElement('th');
+                    th.textContent = day;
+                    th.className = 'weekday';
+                    if (day === '六' || day === '日') {
+                        th.className = 'holiday';
+                    }
+                    dayFooter.appendChild(th);
+                });
+            }
+
+            // 最後一週僅顯示到週二
+            ['一', '二'].forEach(day => {
+                const th = document.createElement('th');
+                th.textContent = day;
+                th.className = 'weekday';
+                dayFooter.appendChild(th);
+            });
+
+            const bottomRightCorner = document.createElement('td');
+            bottomRightCorner.textContent = year; // 右下角年份
+            bottomRightCorner.className = 'year-title';
+            dayFooter.appendChild(bottomRightCorner);
+
+            table.appendChild(dayFooter);
+
+            calendarDiv.appendChild(table);
+        }
+
+        // 預設填入今年年份並生成日曆
+        window.onload = function() {
+            const currentYear = new Date().getFullYear();
+            document.getElementById('yearInput').value = currentYear;
+            generateCalendar();
+        };
+
+        // 綁定「回到今日」按鈕事件
+        document.getElementById("resetToToday").addEventListener("click", function() {
+            const currentYear = new Date().getFullYear();
+            const yearInput = document.getElementById("yearInput");
+            yearInput.value = currentYear; // 將年份輸入框的值設為今年
+            generateCalendar(); // 重新生成日曆
+        });
+    </script>
+</body>
+</html>
